@@ -7,6 +7,7 @@ export type UserRole =
 
 export interface OfficialProfile {
   id: string;
+  username: string;
   name: string;
   title: string;
   role: UserRole;

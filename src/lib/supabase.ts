@@ -34,10 +34,12 @@ const supabaseAnonKey =
 
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-// Official Church Credentials & Passcodes
-export const OFFICIAL_CREDENTIALS: Array<OfficialProfile & { passcode: string }> = [
+// Official Church Credentials & Passwords
+export const OFFICIAL_CREDENTIALS: Array<OfficialProfile & { password: string; passcode?: string }> = [
   {
     id: "usr-01",
+    username: "session.clerk",
+    password: "12345678",
     passcode: "CLERK-2024",
     name: "Elder James Mwangi",
     title: "Session Clerk & System Administrator",
@@ -48,6 +50,8 @@ export const OFFICIAL_CREDENTIALS: Array<OfficialProfile & { passcode: string }>
   },
   {
     id: "usr-02",
+    username: "parish.minister",
+    password: "12345678",
     passcode: "MINISTER-777",
     name: "Rev. Dr. Samuel K. Mwangi",
     title: "Parish Minister & Kirk Session Moderator",
@@ -58,6 +62,8 @@ export const OFFICIAL_CREDENTIALS: Array<OfficialProfile & { passcode: string }>
   },
   {
     id: "usr-03",
+    username: "lcc.chair",
+    password: "12345678",
     passcode: "LCC-CHAIR",
     name: "Margaret Ndungu",
     title: "LCC Chairperson",
@@ -68,6 +74,8 @@ export const OFFICIAL_CREDENTIALS: Array<OfficialProfile & { passcode: string }>
   },
   {
     id: "usr-04",
+    username: "treasurer",
+    password: "12345678",
     passcode: "TREASURY-01",
     name: "Elder Grace Wanjiku",
     title: "Parish Treasurer & Finance Convener",
@@ -78,6 +86,8 @@ export const OFFICIAL_CREDENTIALS: Array<OfficialProfile & { passcode: string }>
   },
   {
     id: "usr-05",
+    username: "womans.guild",
+    password: "12345678",
     passcode: "GUILD-SEC",
     name: "Beatrice Waweru",
     title: "Woman's Guild Secretary",
@@ -197,20 +207,26 @@ export async function submitSermonRequest(payload: SermonRequestPayload): Promis
 // 2. RMS BACKEND QUERIES & AUTHENTICATION
 // ────────────────────────────────────────────────────────────────────
 
-export async function verifyOfficialPasscode(inputPasscode: string): Promise<OfficialProfile | null> {
-  const cleanCode = inputPasscode.trim().toUpperCase();
+export async function verifyOfficialLogin(usernameInput: string, passwordInput: string): Promise<OfficialProfile | null> {
+  const cleanUser = usernameInput.trim().toLowerCase();
+  const cleanPass = passwordInput.trim();
 
+  if (!cleanUser || !cleanPass) return null;
+
+  // 1. Try Supabase query
   if (supabase) {
     try {
       const { data, error } = await supabase
         .from("officials")
         .select("*")
-        .eq("passcode", cleanCode)
+        .ilike("username", cleanUser)
+        .eq("password", cleanPass)
         .maybeSingle();
 
       if (!error && data) {
         return {
           id: data.id,
+          username: data.username,
           name: data.name,
           title: data.title,
           role: data.role,
@@ -225,28 +241,36 @@ export async function verifyOfficialPasscode(inputPasscode: string): Promise<Off
     }
   }
 
-  // Exact match
-  const exact = OFFICIAL_CREDENTIALS.find((u) => u.passcode.toUpperCase() === cleanCode);
+  // 2. Direct match against OFFICIAL_CREDENTIALS
+  const exact = OFFICIAL_CREDENTIALS.find(
+    (u) => u.username.toLowerCase() === cleanUser && u.password === cleanPass
+  );
   if (exact) return exact;
 
-  // Intuitive natural aliases (so user never gets locked out if they type 'clerk', '2024', 'admin', 'minister', 'lcc', 'treasury', 'guild')
-  if (cleanCode === "CLERK" || cleanCode === "2024" || cleanCode === "ADMIN" || cleanCode === "KILELESHWA" || cleanCode === "SESSION") {
-    return OFFICIAL_CREDENTIALS[0]; // Session Clerk
-  }
-  if (cleanCode === "MINISTER" || cleanCode === "PASTOR" || cleanCode === "SAMUEL" || cleanCode === "777") {
-    return OFFICIAL_CREDENTIALS[1]; // Parish Minister
-  }
-  if (cleanCode === "LCC" || cleanCode === "COUNCIL" || cleanCode === "CHAIR") {
-    return OFFICIAL_CREDENTIALS[2]; // LCC Chair
-  }
-  if (cleanCode === "TREASURY" || cleanCode === "FINANCE" || cleanCode === "TREASURER") {
-    return OFFICIAL_CREDENTIALS[3]; // Treasurer
-  }
-  if (cleanCode === "GUILD" || cleanCode === "WOMAN" || cleanCode === "SECRETARY") {
-    return OFFICIAL_CREDENTIALS[4]; // Committee Secretary
+  // 3. Natural role/alias mapping when password is '12345678'
+  if (cleanPass === "12345678") {
+    if (["session.clerk", "clerk", "admin", "session", "elder"].includes(cleanUser)) {
+      return OFFICIAL_CREDENTIALS[0]; // Elder James Mwangi (Session Clerk)
+    }
+    if (["parish.minister", "minister", "pastor", "samuel"].includes(cleanUser)) {
+      return OFFICIAL_CREDENTIALS[1]; // Rev. Dr. Samuel K. Mwangi
+    }
+    if (["lcc.chair", "lcc", "chair", "margaret"].includes(cleanUser)) {
+      return OFFICIAL_CREDENTIALS[2]; // Margaret Ndungu (LCC Chair)
+    }
+    if (["treasurer", "treasury", "finance", "grace"].includes(cleanUser)) {
+      return OFFICIAL_CREDENTIALS[3]; // Elder Grace Wanjiku (Parish Treasurer)
+    }
+    if (["womans.guild", "guild", "secretary", "beatrice"].includes(cleanUser)) {
+      return OFFICIAL_CREDENTIALS[4]; // Beatrice Waweru (Woman's Guild Sec)
+    }
   }
 
   return null;
+}
+
+export async function verifyOfficialPasscode(inputPasscode: string): Promise<OfficialProfile | null> {
+  return verifyOfficialLogin(inputPasscode, "12345678");
 }
 
 export async function fetchCommitteesFromDB(): Promise<RMSCommittee[]> {

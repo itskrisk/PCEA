@@ -11,6 +11,7 @@ import {
 export const SAMPLE_OFFICIALS: OfficialProfile[] = [
   {
     id: "usr-01",
+    username: "session.clerk",
     name: "Elder James Mwangi",
     title: "Session Clerk & System Administrator",
     role: "system_admin",
@@ -20,6 +21,7 @@ export const SAMPLE_OFFICIALS: OfficialProfile[] = [
   },
   {
     id: "usr-02",
+    username: "parish.minister",
     name: "Rev. Dr. Samuel K. Mwangi",
     title: "Parish Minister & Kirk Session Moderator",
     role: "parish_minister",
@@ -29,6 +31,7 @@ export const SAMPLE_OFFICIALS: OfficialProfile[] = [
   },
   {
     id: "usr-03",
+    username: "lcc.chair",
     name: "Margaret Ndungu",
     title: "LCC Chairperson",
     role: "lcc_executive",
@@ -38,6 +41,7 @@ export const SAMPLE_OFFICIALS: OfficialProfile[] = [
   },
   {
     id: "usr-04",
+    username: "treasurer",
     name: "Elder Grace Wanjiku",
     title: "Parish Treasurer & Finance Convener",
     role: "finance_committee",
@@ -47,6 +51,7 @@ export const SAMPLE_OFFICIALS: OfficialProfile[] = [
   },
   {
     id: "usr-05",
+    username: "womans.guild",
     name: "Beatrice Waweru",
     title: "Woman's Guild Secretary",
     role: "committee_secretary",

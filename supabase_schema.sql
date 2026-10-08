@@ -97,10 +97,12 @@ CREATE TABLE IF NOT EXISTS public.sermon_requests (
 -- 2. INSTITUTIONAL RECORDS MANAGEMENT SYSTEM (RMS) TABLES
 -- ────────────────────────────────────────────────────────────────────
 
--- Authorized Officials with Passcodes & Term Bindings
+-- Authorized Officials with Username, Password & Term Bindings
 CREATE TABLE IF NOT EXISTS public.officials (
   id TEXT PRIMARY KEY,
-  passcode TEXT NOT NULL,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  passcode TEXT,
   name TEXT NOT NULL,
   title TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('system_admin', 'parish_minister', 'lcc_executive', 'finance_committee', 'committee_secretary')),
@@ -234,3 +236,38 @@ CREATE POLICY "Allow all on documents" ON public.documents FOR ALL USING (true);
 CREATE POLICY "Allow all on monthly_reports" ON public.monthly_reports FOR ALL USING (true);
 CREATE POLICY "Allow all on handovers" ON public.handovers FOR ALL USING (true);
 CREATE POLICY "Allow all on audit_logs" ON public.audit_logs FOR ALL USING (true);
+
+-- Ensure columns exist if table was created in an earlier migration
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='officials' AND column_name='username') THEN
+    ALTER TABLE public.officials ADD COLUMN username TEXT UNIQUE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='officials' AND column_name='password') THEN
+    ALTER TABLE public.officials ADD COLUMN password TEXT;
+  END IF;
+END $$;
+
+-- ────────────────────────────────────────────────────────────────────
+-- 4. OFFICIAL LEADERSHIP SEED ACCOUNTS (All passwords: 12345678)
+-- ────────────────────────────────────────────────────────────────────
+
+INSERT INTO public.officials (id, username, password, passcode, name, title, role, committee_code, term_range, term_end_date, email)
+VALUES
+  ('usr-01', 'session.clerk', '12345678', 'CLERK-2024', 'Elder James Mwangi', 'Session Clerk & System Administrator', 'system_admin', NULL, '2024–2027', '31 Oct 2027', 'sessionclerk@pceakileleshwa.or.ke'),
+  ('usr-02', 'parish.minister', '12345678', 'MINISTER-777', 'Rev. Dr. Samuel K. Mwangi', 'Parish Minister & Kirk Session Moderator', 'parish_minister', NULL, 'Permanent / Call', 'Permanent', 'minister@pceakileleshwa.or.ke'),
+  ('usr-03', 'lcc.chair', '12345678', 'LCC-CHAIR', 'Margaret Ndungu', 'LCC Chairperson', 'lcc_executive', NULL, '2024–2027', '31 Oct 2027', 'lcc.chair@pceakileleshwa.or.ke'),
+  ('usr-04', 'treasurer', '12345678', 'TREASURY-01', 'Elder Grace Wanjiku', 'Parish Treasurer & Finance Convener', 'finance_committee', NULL, '2023–2026', '30 Nov 2026', 'treasury@pceakileleshwa.or.ke'),
+  ('usr-05', 'womans.guild', '12345678', 'GUILD-SEC', 'Beatrice Waweru', 'Woman''s Guild Secretary', 'committee_secretary', 'COM-01', '2024–2027', '31 Oct 2027', 'womansguild.sec@pceakileleshwa.or.ke')
+ON CONFLICT (id) DO UPDATE SET
+  username = EXCLUDED.username,
+  password = EXCLUDED.password,
+  passcode = EXCLUDED.passcode,
+  name = EXCLUDED.name,
+  title = EXCLUDED.title,
+  role = EXCLUDED.role,
+  committee_code = EXCLUDED.committee_code,
+  term_range = EXCLUDED.term_range,
+  term_end_date = EXCLUDED.term_end_date,
+  email = EXCLUDED.email;
+

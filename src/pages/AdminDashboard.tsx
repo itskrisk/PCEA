@@ -18,6 +18,7 @@ import {
   Clock,
   CheckCircle,
   HelpCircle,
+  User,
 } from "lucide-react";
 
 import pceaLogo from "@/images/pcealogo.png";
@@ -29,6 +30,7 @@ import {
   HandoverRecord,
 } from "@/types/rms";
 import {
+  verifyOfficialLogin,
   verifyOfficialPasscode,
   fetchCommitteesFromDB,
   fetchDocumentsFromDB,
@@ -53,7 +55,8 @@ export function AdminDashboard() {
     }
   });
 
-  const [inputPasscode, setInputPasscode] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -126,15 +129,15 @@ export function AdminDashboard() {
     loadData();
   }, []);
 
-  // Passcode authentication
+  // Official authentication
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputPasscode.trim()) return;
+    if (!username.trim() || !password.trim()) return;
 
     setAuthLoading(true);
     setAuthError(null);
 
-    const verified = await verifyOfficialPasscode(inputPasscode);
+    const verified = await verifyOfficialLogin(username, password);
     setAuthLoading(false);
 
     if (verified) {
@@ -142,7 +145,7 @@ export function AdminDashboard() {
       sessionStorage.setItem("pcea_active_official", JSON.stringify(verified));
       recordAuditEvent(verified.name, verified.title, "ACCESS_CHANGE", "Signed in to church records.");
     } else {
-      setAuthError("Incorrect access code. Please check with the Session Clerk or Church Secretariat.");
+      setAuthError("Invalid username or password. Please verify your credentials or contact the Session Clerk.");
     }
   };
 
@@ -152,7 +155,8 @@ export function AdminDashboard() {
     }
     setActiveOfficial(null);
     sessionStorage.removeItem("pcea_active_official");
-    setInputPasscode("");
+    setUsername("");
+    setPassword("");
   };
 
   // Permissions
@@ -272,7 +276,7 @@ export function AdminDashboard() {
   };
 
   // ──────────────────────────────────────────────────────────────────
-  // 1. SIMPLE, AUTHENTIC PASSCODE LOGIN
+  // 1. SIMPLE, AUTHENTIC USERNAME & PASSWORD LOGIN
   // ──────────────────────────────────────────────────────────────────
   if (!activeOfficial) {
     return (
@@ -298,7 +302,7 @@ export function AdminDashboard() {
           </div>
 
           <p className="text-xs text-[#57554f] leading-relaxed text-center font-sans">
-            Please enter your official access code to view church documents, minutes, and committee reports.
+            Sign in with your official account credentials to access governance records, committee reports, and archival minutes.
           </p>
 
           {authError && (
@@ -310,19 +314,41 @@ export function AdminDashboard() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="passcode" className="block text-[10px] font-mono uppercase tracking-widest text-[#8a877e] mb-1.5">
-                Official Access Code
+              <label htmlFor="username" className="block text-xs font-medium text-[#57554f] mb-1.5">
+                Username
               </label>
               <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a877e]" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a877e]" />
                 <input
-                  id="passcode"
+                  id="username"
+                  type="text"
+                  required
+                  autoCapitalize="none"
+                  autoComplete="username"
+                  placeholder="e.g. session.clerk"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 text-sm border border-[#e8e4dc] bg-[#faf8f5] focus:outline-none focus:border-[#1c1b18] text-[#1c1b18]"
+                  style={{ borderRadius: "2px" }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-xs font-medium text-[#57554f] mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a877e]" />
+                <input
+                  id="password"
                   type="password"
                   required
-                  placeholder="Enter access code..."
-                  value={inputPasscode}
-                  onChange={(e) => setInputPasscode(e.target.value)}
-                  className="w-full pl-9 pr-4 py-3 text-sm border border-[#e8e4dc] bg-[#faf8f5] focus:outline-none focus:border-[#1c1b18] text-[#1c1b18] font-mono"
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 text-sm border border-[#e8e4dc] bg-[#faf8f5] focus:outline-none focus:border-[#1c1b18] text-[#1c1b18]"
                   style={{ borderRadius: "2px" }}
                 />
               </div>
@@ -331,10 +357,10 @@ export function AdminDashboard() {
             <button
               type="submit"
               disabled={authLoading}
-              className="w-full py-3 bg-[#1c1b18] text-white text-xs font-mono uppercase tracking-widest hover:bg-[#383631] transition-colors disabled:opacity-50"
+              className="w-full py-3 mt-2 bg-[#1c1b18] text-white text-xs font-mono uppercase tracking-widest hover:bg-[#383631] transition-colors disabled:opacity-50"
               style={{ borderRadius: "2px" }}
             >
-              {authLoading ? "Checking Code..." : "Sign In"}
+              {authLoading ? "Verifying..." : "Sign In"}
             </button>
           </form>
 
