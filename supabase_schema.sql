@@ -209,32 +209,75 @@ ALTER TABLE public.handovers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- Anonymous public inserts for front door forms:
+DROP POLICY IF EXISTS "Public insert prayer_requests" ON public.prayer_requests;
 CREATE POLICY "Public insert prayer_requests" ON public.prayer_requests FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert contact_messages" ON public.contact_messages;
 CREATE POLICY "Public insert contact_messages" ON public.contact_messages FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert feedback_submissions" ON public.feedback_submissions;
 CREATE POLICY "Public insert feedback_submissions" ON public.feedback_submissions FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert event_registrations" ON public.event_registrations;
 CREATE POLICY "Public insert event_registrations" ON public.event_registrations FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert ministry_interests" ON public.ministry_interests;
 CREATE POLICY "Public insert ministry_interests" ON public.ministry_interests FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert testimonies" ON public.testimonies;
 CREATE POLICY "Public insert testimonies" ON public.testimonies FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert newsletter_subscribers" ON public.newsletter_subscribers;
 CREATE POLICY "Public insert newsletter_subscribers" ON public.newsletter_subscribers FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert giving_pledges" ON public.giving_pledges;
 CREATE POLICY "Public insert giving_pledges" ON public.giving_pledges FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public insert sermon_requests" ON public.sermon_requests;
 CREATE POLICY "Public insert sermon_requests" ON public.sermon_requests FOR INSERT WITH CHECK (true);
 
 -- Read access on public tables for church administrative dashboard:
+DROP POLICY IF EXISTS "Allow read on prayer_requests" ON public.prayer_requests;
 CREATE POLICY "Allow read on prayer_requests" ON public.prayer_requests FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow update on prayer_requests" ON public.prayer_requests;
 CREATE POLICY "Allow update on prayer_requests" ON public.prayer_requests FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Allow read on contact_messages" ON public.contact_messages;
 CREATE POLICY "Allow read on contact_messages" ON public.contact_messages FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow read on feedback_submissions" ON public.feedback_submissions;
 CREATE POLICY "Allow read on feedback_submissions" ON public.feedback_submissions FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow read on event_registrations" ON public.event_registrations;
 CREATE POLICY "Allow read on event_registrations" ON public.event_registrations FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow read on ministry_interests" ON public.ministry_interests;
 CREATE POLICY "Allow read on ministry_interests" ON public.ministry_interests FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow read on testimonies" ON public.testimonies;
 CREATE POLICY "Allow read on testimonies" ON public.testimonies FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow read on giving_pledges" ON public.giving_pledges;
 CREATE POLICY "Allow read on giving_pledges" ON public.giving_pledges FOR SELECT USING (true);
 
 -- RMS Policies:
+DROP POLICY IF EXISTS "Allow read on officials" ON public.officials;
 CREATE POLICY "Allow read on officials" ON public.officials FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow all on committees" ON public.committees;
 CREATE POLICY "Allow all on committees" ON public.committees FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow all on documents" ON public.documents;
 CREATE POLICY "Allow all on documents" ON public.documents FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow all on monthly_reports" ON public.monthly_reports;
 CREATE POLICY "Allow all on monthly_reports" ON public.monthly_reports FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow all on handovers" ON public.handovers;
 CREATE POLICY "Allow all on handovers" ON public.handovers FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Allow all on audit_logs" ON public.audit_logs;
 CREATE POLICY "Allow all on audit_logs" ON public.audit_logs FOR ALL USING (true);
 
 -- Ensure columns exist if table was created in an earlier migration
