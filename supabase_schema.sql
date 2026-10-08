@@ -289,6 +289,10 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='officials' AND column_name='password') THEN
     ALTER TABLE public.officials ADD COLUMN password TEXT;
   END IF;
+  -- Remove NOT NULL constraint on legacy passcode column if present
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='officials' AND column_name='passcode' AND is_nullable='NO') THEN
+    ALTER TABLE public.officials ALTER COLUMN passcode DROP NOT NULL;
+  END IF;
 END $$;
 
 -- ────────────────────────────────────────────────────────────────────
