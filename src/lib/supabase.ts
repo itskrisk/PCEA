@@ -542,14 +542,16 @@ export async function fetchLivePublicInbox(): Promise<Array<{ id: string; table:
   
   if (supabase) {
     try {
-      const [pr, cm, fb, er, mi, ts, gp] = await Promise.all([
-        supabase.from("prayer_requests").select("*").order("created_at", { ascending: false }).limit(10),
-        supabase.from("contact_messages").select("*").order("created_at", { ascending: false }).limit(10),
-        supabase.from("feedback_submissions").select("*").order("created_at", { ascending: false }).limit(10),
-        supabase.from("event_registrations").select("*").order("created_at", { ascending: false }).limit(10),
-        supabase.from("ministry_interests").select("*").order("created_at", { ascending: false }).limit(10),
-        supabase.from("testimonies").select("*").order("created_at", { ascending: false }).limit(10),
-        supabase.from("giving_pledges").select("*").order("created_at", { ascending: false }).limit(10),
+      const [pr, cm, fb, er, mi, ts, gp, sr, nl] = await Promise.all([
+        supabase.from("prayer_requests").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("contact_messages").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("feedback_submissions").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("event_registrations").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("ministry_interests").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("testimonies").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("giving_pledges").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("sermon_requests").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("newsletter_subscribers").select("*").order("created_at", { ascending: false }).limit(40),
       ]);
 
       const remoteItems: Array<{ id: string; table: string; payload: Record<string, unknown>; created_at: string }> = [];
@@ -561,9 +563,20 @@ export async function fetchLivePublicInbox(): Promise<Array<{ id: string; table:
       if (mi.data) mi.data.forEach((item) => remoteItems.push({ id: item.id, table: "ministry_interests", payload: item, created_at: item.created_at }));
       if (ts.data) ts.data.forEach((item) => remoteItems.push({ id: item.id, table: "testimonies", payload: item, created_at: item.created_at }));
       if (gp.data) gp.data.forEach((item) => remoteItems.push({ id: item.id, table: "giving_pledges", payload: item, created_at: item.created_at }));
+      if (sr.data) sr.data.forEach((item) => remoteItems.push({ id: item.id, table: "sermon_requests", payload: item, created_at: item.created_at }));
+      if (nl.data) nl.data.forEach((item) => remoteItems.push({ id: item.id, table: "newsletter_subscribers", payload: item, created_at: item.created_at }));
 
-      if (remoteItems.length > 0) {
-        return remoteItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      // Merge and deduplicate by ID or signature
+      const combined = [...remoteItems];
+      const remoteIds = new Set(remoteItems.map((r) => r.id));
+      for (const loc of localItems) {
+        if (!remoteIds.has(loc.id)) {
+          combined.push(loc);
+        }
+      }
+
+      if (combined.length > 0) {
+        return combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
     } catch {
       // fallback

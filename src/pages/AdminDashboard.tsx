@@ -19,6 +19,11 @@ import {
   CheckCircle,
   HelpCircle,
   User,
+  Mail,
+  Phone,
+  Copy,
+  Check,
+  Filter,
 } from "lucide-react";
 
 import pceaLogo from "@/images/pcealogo.png";
@@ -78,6 +83,14 @@ export function AdminDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showHandoverModal, setShowHandoverModal] = useState(false);
   const [selectedDocPreview, setSelectedDocPreview] = useState<ChurchDocument | null>(null);
+  const [inboxFilter, setInboxFilter] = useState<string>("all");
+  const [selectedInboxItem, setSelectedInboxItem] = useState<{
+    id: string;
+    table: string;
+    payload: Record<string, unknown>;
+    created_at: string;
+  } | null>(null);
+  const [inboxCopied, setInboxCopied] = useState(false);
 
   // Form states
   const [newDoc, setNewDoc] = useState({
@@ -186,6 +199,21 @@ export function AdminDashboard() {
       return matchSearch && matchYear && matchCategory;
     });
   }, [documents, searchQuery, selectedYear, selectedCategory, canAccessFinance]);
+
+  // Filtered public submissions
+  const filteredInbox = useMemo(() => {
+    return publicInbox.filter((item) => {
+      if (inboxFilter === "all") return true;
+      if (inboxFilter === "prayer") return item.table === "prayer_requests";
+      if (inboxFilter === "volunteer") return item.table === "ministry_interests";
+      if (inboxFilter === "giving") return item.table === "giving_pledges";
+      if (inboxFilter === "rsvp") return item.table === "event_registrations";
+      if (inboxFilter === "contact") return item.table === "contact_messages";
+      if (inboxFilter === "feedback") return item.table === "feedback_submissions";
+      if (inboxFilter === "sermon") return item.table === "sermon_requests";
+      return true;
+    });
+  }, [publicInbox, inboxFilter]);
 
   // Upload Document
   const handleUploadDoc = async (e: React.FormEvent) => {
@@ -749,71 +777,207 @@ export function AdminDashboard() {
 
           {/* Card 5: Public Messages & Prayer Requests (Span 8) */}
           <div className="lg:col-span-8 bg-white border border-[#e8e4dc] p-8 space-y-5">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#781d19] font-medium mb-1">
-                  Front Door Messages
+                  Public Inquiries &amp; Front Door
                 </p>
                 <h2 className="font-serif text-2xl text-[#1c1b18]">
-                  Public Inquiries &amp; Prayer Petitions
+                  Submissions from Connect Page
                 </h2>
-                <p className="text-xs text-[#57554f] mt-1">
-                  Incoming submissions from the church website. Real-time feed from Supabase.
+                <p className="text-xs text-[#57554f] mt-0.5">
+                  Real-time sync from Supabase. Submissions filed by church members and visitors.
                 </p>
               </div>
 
-              <span className="px-2.5 py-1 text-[10px] font-mono uppercase text-[#2b4c38] bg-[#2b4c38]/10 font-medium">
-                Live Feed ({publicInbox.length})
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={loadData}
+                  disabled={isLoading}
+                  title="Reload feed from Supabase"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#e8e4dc] hover:border-[#1c1b18] text-xs font-mono text-[#57554f] hover:text-[#1c1b18] transition-colors"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                  <span>Refresh</span>
+                </button>
+                <span className="px-2.5 py-1 text-[10px] font-mono uppercase text-[#2b4c38] bg-[#2b4c38]/10 font-medium">
+                  {publicInbox.length} Live Items
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-              {publicInbox.map((item) => (
-                <div key={item.id} className="p-4 border border-[#e8e4dc] bg-[#faf8f5] space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] uppercase font-bold text-[#781d19]">
-                      {item.table.replace("_", " ")}
-                    </span>
-                    <span className="text-[10px] font-mono text-[#8a877e]">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  {item.payload.name && (
-                    <p className="font-serif text-sm font-medium text-[#1c1b18]">
-                      From: {String(item.payload.name)}
-                    </p>
-                  )}
-
-                  {item.payload.request && (
-                    <p className="text-xs text-[#57554f] italic leading-relaxed">
-                      &ldquo;{String(item.payload.request)}&rdquo;
-                    </p>
-                  )}
-
-                  {item.payload.committee_name && (
-                    <p className="text-xs text-[#2b4c38] font-mono">
-                      Target Ministry: {String(item.payload.committee_name)}
-                    </p>
-                  )}
-
-                  {item.payload.message && (
-                    <p className="text-xs text-[#57554f] leading-relaxed">
-                      &ldquo;{String(item.payload.message)}&rdquo;
-                    </p>
-                  )}
-
-                  {item.payload.privacy === "pastor_only" && (
-                    <span className="inline-block mt-1 text-[9px] font-mono uppercase bg-[#1c1b18] text-white px-2 py-0.5">
-                      Confidential &bull; Pastor Only
-                    </span>
-                  )}
-                </div>
+            {/* Quick Category Filter Bar */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-[#e8e4dc] text-xs font-mono">
+              {[
+                { id: "all", label: "All", count: publicInbox.length },
+                { id: "prayer", label: "Prayers", count: publicInbox.filter((i) => i.table === "prayer_requests").length },
+                { id: "volunteer", label: "Volunteer", count: publicInbox.filter((i) => i.table === "ministry_interests").length },
+                { id: "giving", label: "Giving/Pledge", count: publicInbox.filter((i) => i.table === "giving_pledges").length },
+                { id: "rsvp", label: "Events", count: publicInbox.filter((i) => i.table === "event_registrations").length },
+                { id: "contact", label: "Contact", count: publicInbox.filter((i) => i.table === "contact_messages").length },
+                { id: "feedback", label: "Feedback", count: publicInbox.filter((i) => i.table === "feedback_submissions").length },
+                { id: "sermon", label: "Sermons", count: publicInbox.filter((i) => i.table === "sermon_requests").length },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setInboxFilter(tab.id)}
+                  className={`px-2.5 py-1 text-[11px] uppercase tracking-wider transition-colors whitespace-nowrap ${
+                    inboxFilter === tab.id
+                      ? "bg-[#1c1b18] text-white"
+                      : "bg-[#faf8f5] text-[#57554f] hover:text-[#1c1b18] border border-[#e8e4dc]"
+                  }`}
+                  style={{ borderRadius: "2px" }}
+                >
+                  {tab.label} <span className="opacity-70">({tab.count})</span>
+                </button>
               ))}
+            </div>
 
-              {publicInbox.length === 0 && (
-                <div className="py-12 text-center text-[#8a877e] text-xs">
-                  No public messages or prayer requests in the database yet.
+            {/* Submissions List */}
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+              {filteredInbox.map((item) => {
+                const isPrayer = item.table === "prayer_requests";
+                const isVolunteer = item.table === "ministry_interests";
+                const isGiving = item.table === "giving_pledges";
+                const isRsvp = item.table === "event_registrations";
+                const isContact = item.table === "contact_messages";
+                const isFeedback = item.table === "feedback_submissions";
+                const isSermon = item.table === "sermon_requests";
+                const isTestimony = item.table === "testimonies";
+
+                const categoryLabel =
+                  isPrayer ? "Prayer Petition" :
+                  isVolunteer ? "Ministry Placement" :
+                  isGiving ? "Pledge Enquiry" :
+                  isRsvp ? "Event RSVP" :
+                  isContact ? "Direct Message" :
+                  isFeedback ? "Parish Feedback" :
+                  isSermon ? "Sermon Audio" :
+                  isTestimony ? "Testimony" : item.table;
+
+                const contactInfo = item.payload.contact || item.payload.email || item.payload.phone;
+
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 border border-[#e8e4dc] bg-[#faf8f5] hover:bg-white hover:border-[#cfc9bc] transition-all space-y-2 text-xs"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider ${
+                          isPrayer ? "bg-[#781d19]/10 text-[#781d19]" :
+                          isVolunteer ? "bg-[#2b4c38]/10 text-[#2b4c38]" :
+                          isGiving ? "bg-[#b8860b]/15 text-[#8b6508]" :
+                          isRsvp ? "bg-indigo-50 text-indigo-800" :
+                          "bg-[#1c1b18]/10 text-[#1c1b18]"
+                        }`}>
+                          {categoryLabel}
+                        </span>
+                        {item.payload.privacy === "pastor_only" && (
+                          <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase bg-[#1c1b18] text-white">
+                            Pastor Only
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-mono text-[#8a877e]">
+                        {new Date(item.created_at).toLocaleDateString("en-KE", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                      <p className="font-serif text-sm font-medium text-[#1c1b18]">
+                        {item.payload.name ? String(item.payload.name) : "Anonymous Member"}
+                      </p>
+                      {contactInfo && (
+                        <span className="text-[11px] font-mono text-[#6e6b62]">
+                          {String(contactInfo)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Specific detail rendering */}
+                    {isPrayer && item.payload.request && (
+                      <p className="text-xs text-[#57554f] italic line-clamp-2 leading-relaxed">
+                        &ldquo;{String(item.payload.request)}&rdquo;
+                      </p>
+                    )}
+
+                    {isVolunteer && (
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-mono text-[#2b4c38] font-medium">
+                          Selected Committee: {String(item.payload.committee_name || "Any")}
+                        </p>
+                        {item.payload.skills_notes && (
+                          <p className="text-xs text-[#57554f] line-clamp-1">
+                            Skills: {String(item.payload.skills_notes)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {isGiving && (
+                      <p className="text-xs text-[#57554f]">
+                        <span className="font-medium text-[#1c1b18]">Purpose: {String(item.payload.purpose)}</span>
+                        {item.payload.amount ? ` • Pledged Amount: KES ${String(item.payload.amount)}` : ""}
+                      </p>
+                    )}
+
+                    {isRsvp && (
+                      <p className="text-xs text-[#57554f]">
+                        <span className="font-medium text-[#1c1b18]">Event: {String(item.payload.event_name)}</span>
+                        {item.payload.attendees_count ? ` • Attendees: ${String(item.payload.attendees_count)}` : ""}
+                      </p>
+                    )}
+
+                    {isContact && item.payload.message && (
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-medium text-[#1c1b18]">
+                          Subject: {String(item.payload.subject || "General")}
+                        </p>
+                        <p className="text-xs text-[#57554f] line-clamp-2">
+                          &ldquo;{String(item.payload.message)}&rdquo;
+                        </p>
+                      </div>
+                    )}
+
+                    {isFeedback && item.payload.feedback && (
+                      <p className="text-xs text-[#57554f] line-clamp-2">
+                        <span className="font-mono text-[10px] text-[#8a877e] uppercase">[{String(item.payload.category)}]</span>{" "}
+                        &ldquo;{String(item.payload.feedback)}&rdquo;
+                      </p>
+                    )}
+
+                    {isSermon && (
+                      <p className="text-xs text-[#57554f]">
+                        Type: {String(item.payload.request_type)}
+                        {item.payload.sermon_reference ? ` • Ref: ${String(item.payload.sermon_reference)}` : ""}
+                      </p>
+                    )}
+
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInboxItem(item)}
+                        className="text-[11px] font-mono text-[#781d19] hover:underline uppercase tracking-wider"
+                      >
+                        Inspect Full Inquiry &rarr;
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {filteredInbox.length === 0 && (
+                <div className="py-12 text-center text-[#8a877e] text-xs font-mono">
+                  No submissions found in this category.
                 </div>
               )}
             </div>
@@ -1205,6 +1369,167 @@ export function AdminDashboard() {
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Open Document</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: DETAILED INBOX SUBMISSION ───────────────────────── */}
+      {selectedInboxItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white max-w-lg w-full p-8 border border-[#e8e4dc] space-y-5 shadow-lg">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#781d19]">
+                  {selectedInboxItem.table.replace("_", " ")}
+                </p>
+                <h3 className="font-serif text-2xl text-[#1c1b18] mt-1">
+                  {selectedInboxItem.payload.name ? String(selectedInboxItem.payload.name) : "Anonymous Submission"}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedInboxItem(null);
+                  setInboxCopied(false);
+                }}
+                className="text-xs font-mono text-[#8a877e] hover:text-[#1c1b18]"
+              >
+                &times; Close
+              </button>
+            </div>
+
+            <div className="p-4 bg-[#faf8f5] border border-[#e8e4dc] space-y-2 text-xs font-mono">
+              <div className="flex justify-between border-b border-[#e8e4dc] pb-1.5">
+                <span className="text-[#8a877e]">Received On:</span>
+                <span className="text-[#1c1b18] font-medium">
+                  {new Date(selectedInboxItem.created_at).toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })} EAT
+                </span>
+              </div>
+
+              {(selectedInboxItem.payload.contact || selectedInboxItem.payload.email) && (
+                <div className="flex justify-between items-center border-b border-[#e8e4dc] pb-1.5">
+                  <span className="text-[#8a877e]">Contact:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#1c1b18] font-medium">
+                      {String(selectedInboxItem.payload.contact || selectedInboxItem.payload.email)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(String(selectedInboxItem.payload.contact || selectedInboxItem.payload.email));
+                        setInboxCopied(true);
+                        setTimeout(() => setInboxCopied(false), 2000);
+                      }}
+                      className="p-1 hover:bg-[#e8e4dc] text-[#57554f]"
+                      title="Copy Contact"
+                    >
+                      {inboxCopied ? <Check className="w-3 h-3 text-[#2b4c38]" /> : <Copy className="w-3 h-3" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedInboxItem.payload.committee_name && (
+                <div className="flex justify-between border-b border-[#e8e4dc] pb-1.5">
+                  <span className="text-[#8a877e]">Target Committee:</span>
+                  <span className="text-[#2b4c38] font-medium">{String(selectedInboxItem.payload.committee_name)}</span>
+                </div>
+              )}
+
+              {selectedInboxItem.payload.event_name && (
+                <div className="flex justify-between border-b border-[#e8e4dc] pb-1.5">
+                  <span className="text-[#8a877e]">Event:</span>
+                  <span className="text-[#1c1b18] font-medium">{String(selectedInboxItem.payload.event_name)}</span>
+                </div>
+              )}
+
+              {selectedInboxItem.payload.attendees_count !== undefined && (
+                <div className="flex justify-between border-b border-[#e8e4dc] pb-1.5">
+                  <span className="text-[#8a877e]">Attendees:</span>
+                  <span className="text-[#1c1b18] font-medium">{String(selectedInboxItem.payload.attendees_count)}</span>
+                </div>
+              )}
+
+              {selectedInboxItem.payload.purpose && (
+                <div className="flex justify-between border-b border-[#e8e4dc] pb-1.5">
+                  <span className="text-[#8a877e]">Giving Purpose:</span>
+                  <span className="text-[#1c1b18] font-medium">{String(selectedInboxItem.payload.purpose)}</span>
+                </div>
+              )}
+
+              {selectedInboxItem.payload.amount && (
+                <div className="flex justify-between border-b border-[#e8e4dc] pb-1.5">
+                  <span className="text-[#8a877e]">Amount:</span>
+                  <span className="text-[#1c1b18] font-medium">KES {String(selectedInboxItem.payload.amount)}</span>
+                </div>
+              )}
+
+              {selectedInboxItem.payload.privacy && (
+                <div className="flex justify-between">
+                  <span className="text-[#8a877e]">Confidentiality:</span>
+                  <span className="text-[#781d19] font-medium uppercase">
+                    {selectedInboxItem.payload.privacy === "pastor_only" ? "Pastor Only (Confidential)" : "Prayer Cell"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Verbatim text body */}
+            {(selectedInboxItem.payload.request ||
+              selectedInboxItem.payload.message ||
+              selectedInboxItem.payload.feedback ||
+              selectedInboxItem.payload.skills_notes ||
+              selectedInboxItem.payload.notes ||
+              selectedInboxItem.payload.testimony) && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[#8a877e]">
+                  Submission Content
+                </p>
+                <div className="p-3.5 bg-[#faf8f5] border border-[#e8e4dc] text-xs text-[#1c1b18] leading-relaxed italic max-h-48 overflow-y-auto font-serif">
+                  &ldquo;
+                  {String(
+                    selectedInboxItem.payload.request ||
+                      selectedInboxItem.payload.message ||
+                      selectedInboxItem.payload.feedback ||
+                      selectedInboxItem.payload.skills_notes ||
+                      selectedInboxItem.payload.notes ||
+                      selectedInboxItem.payload.testimony
+                  )}
+                  &rdquo;
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 text-xs font-mono pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedInboxItem(null);
+                  setInboxCopied(false);
+                }}
+                className="px-4 py-2 border border-[#e8e4dc]"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (activeOfficial) {
+                    await recordAuditEvent(
+                      activeOfficial.name,
+                      activeOfficial.title,
+                      "ACCESS_CHANGE",
+                      `Acknowledged ${selectedInboxItem.table.replace("_", " ")} from ${selectedInboxItem.payload.name || "Member"}`
+                    );
+                  }
+                  alert("Submission acknowledged & recorded in church logs.");
+                  setSelectedInboxItem(null);
+                }}
+                className="px-4 py-2 bg-[#1c1b18] text-white hover:bg-[#383631]"
+              >
+                Acknowledge / Mark Reviewed
               </button>
             </div>
           </div>
