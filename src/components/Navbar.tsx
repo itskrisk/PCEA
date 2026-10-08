@@ -18,7 +18,7 @@ export function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 15);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -30,25 +30,25 @@ export function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full transition-all duration-200 ${
         scrolled
-          ? "bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e8e4dc] shadow-[0_1px_12px_rgba(0,0,0,0.03)]"
-          : "bg-[#faf8f5] border-b border-[#e8e4dc]/70"
+          ? "bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e8e4dc] shadow-[0_2px_10px_rgba(0,0,0,0.04)]"
+          : "bg-[#faf8f5] border-b border-[#e8e4dc]"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <div className="max-w-6xl mx-auto px-6 lg:px-12">
         <div className="flex items-center justify-between h-20">
           
-          {/* Logo (Image only, no text) */}
-          <Link to="/" className="flex items-center group py-2">
+          {/* Logo (Image only, clean and crisp) */}
+          <Link to="/" className="flex items-center py-2" aria-label="PCEA Kileleshwa Home">
             <img
               src={pceaLogo}
-              alt="PCEA Logo"
-              className="h-14 md:h-16 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+              alt="PCEA Kileleshwa Logo"
+              className="h-14 md:h-16 w-auto object-contain transition-transform duration-150 hover:opacity-95"
             />
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation — Clear, friendly, Apple-like sans typography */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-10">
             {NAV_LINKS.map((link) => {
               const isActive = location.pathname === link.href;
@@ -56,52 +56,51 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-xs font-mono uppercase tracking-[0.18em] transition-colors relative py-1 ${
+                  className={`text-base font-medium transition-colors relative py-1.5 ${
                     isActive
-                      ? "text-[#1c1b18] font-medium"
-                      : "text-[#69665e] hover:text-[#1c1b18]"
+                      ? "text-[#1a1918]"
+                      : "text-[#55524c] hover:text-[#1a1918]"
                   }`}
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#1c1b18]" />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#781d19] rounded-full" />
                   )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Primary Action Button */}
+          {/* Primary Action Button — High contrast, rounded, readable */}
           <div className="hidden md:flex items-center">
             <Link
               to="/contact"
-              className="inline-flex items-center px-5 py-2.5 bg-[#1c1b18] text-[#faf8f5] text-xs font-mono uppercase tracking-[0.16em] hover:bg-[#383631] transition-colors"
-              style={{ borderRadius: "2px" }}
+              className="inline-flex items-center justify-center px-6 py-2.5 bg-[#1a1918] text-white text-sm font-semibold rounded-full hover:bg-[#33312e] transition-colors shadow-sm"
             >
               Plan a Visit
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button — Large, accessible tap target */}
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 text-[#1c1b18] focus:outline-none"
+            className="md:hidden p-3 text-[#1a1918] hover:bg-[#e8e4dc]/50 rounded-lg focus:outline-none"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer — Large friendly links for everyone including the elderly */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-[#e8e4dc] bg-[#faf8f5] px-6 py-6 space-y-4">
-          <nav className="flex flex-col space-y-3">
+        <div className="md:hidden border-t border-[#e8e4dc] bg-[#faf8f5] px-6 py-6 space-y-4 shadow-lg">
+          <nav className="flex flex-col space-y-2">
             <Link
               to="/"
-              className={`text-xs font-mono uppercase tracking-wider py-2 border-b border-[#e8e4dc] ${
-                location.pathname === "/" ? "font-bold text-[#1c1b18]" : "text-[#69665e]"
+              className={`text-lg font-medium py-3 border-b border-[#e8e4dc] ${
+                location.pathname === "/" ? "font-bold text-[#1a1918]" : "text-[#55524c]"
               }`}
             >
               Home
@@ -112,22 +111,21 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-xs font-mono uppercase tracking-wider py-2 border-b border-[#e8e4dc] flex items-center justify-between ${
-                    isActive ? "font-bold text-[#1c1b18]" : "text-[#69665e]"
+                  className={`text-lg font-medium py-3 border-b border-[#e8e4dc] flex items-center justify-between ${
+                    isActive ? "font-bold text-[#1a1918]" : "text-[#55524c]"
                   }`}
                 >
                   <span>{link.label}</span>
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#781d19]" />}
+                  {isActive && <span className="w-2 h-2 rounded-full bg-[#781d19]" />}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="pt-2">
+          <div className="pt-3">
             <Link
               to="/contact"
-              className="block w-full text-center py-3 bg-[#1c1b18] text-[#faf8f5] text-xs font-mono uppercase tracking-widest"
-              style={{ borderRadius: "2px" }}
+              className="block w-full text-center py-3.5 bg-[#1a1918] text-white text-base font-semibold rounded-full shadow-sm"
             >
               Plan a Visit
             </Link>

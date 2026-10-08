@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { submitNewsletter } from "@/lib/supabase";
-import { Check } from "lucide-react";
+import { Check, MapPin, Mail, Phone } from "lucide-react";
 import pceaLogo from "@/images/pcealogo.png";
 
 export function Footer() {
@@ -22,153 +22,129 @@ export function Footer() {
   };
 
   return (
-    <footer className="w-full bg-[#fbfbf9] text-[#121212] mt-auto border-t border-[#eae8e2]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 md:py-24">
-        {/* Top Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
-          {/* Col 1: Identity & Newsletter */}
-          <div className="md:col-span-5 space-y-4">
-            <Link to="/" className="inline-block mb-1">
+    <footer className="w-full bg-[#1a1918] text-white mt-auto">
+      {/* Main footer content */}
+      <div className="max-w-6xl mx-auto px-6 lg:px-12 pt-16 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
+
+          {/* Column 1 — Identity */}
+          <div className="space-y-5">
+            <Link to="/" className="inline-block">
               <img
                 src={pceaLogo}
-                alt="PCEA Logo"
-                className="h-16 w-auto object-contain"
+                alt="PCEA Kileleshwa"
+                className="h-16 w-auto object-contain brightness-0 invert"
               />
             </Link>
-            <p className="text-sm text-[#575754] max-w-sm leading-relaxed font-serif">
-              A parish of the Presbyterian Church of East Africa situated in
-              Nairobi, Kenya. Established on Reformed biblical heritage, Christ-centered
-              discipleship, and compassionate community service.
+            <p className="text-[#b5b2ac] text-base leading-relaxed">
+              A Presbyterian church family in Nairobi, rooted in biblical
+              truth, Reformed worship, and community life.
             </p>
+            <div className="space-y-2 text-[#b5b2ac] text-sm">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#c2902b]" />
+                <span>Mandera Road, Kileleshwa, Nairobi</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 shrink-0 text-[#c2902b]" />
+                <span>secretary@pceakileleshwa.or.ke</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 shrink-0 text-[#c2902b]" />
+                <span>+254 700 000 000</span>
+              </div>
+            </div>
+          </div>
 
-            {/* Newsletter Signup (Form 7) */}
-            <div className="pt-2 max-w-sm">
-              <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#781d19] font-medium mb-1.5">
-                Parish Announcements
+          {/* Column 2 — Service Times */}
+          <div className="space-y-5">
+            <h3 className="text-white font-semibold text-base uppercase tracking-wide">
+              Sunday Services
+            </h3>
+            <ul className="space-y-4">
+              {[
+                { name: "First Service", time: "8:30 AM" },
+                { name: "Second Service", time: "10:45 AM" },
+                { name: "Church School & Teens", time: "Concurrent" },
+                { name: "Tuesday Prayer", time: "Tue 6:00 PM" },
+                { name: "Wednesday Bible Study", time: "Wed 6:00 PM" },
+              ].map((item) => (
+                <li
+                  key={item.name}
+                  className="flex justify-between items-center border-b border-white/10 pb-3"
+                >
+                  <span className="text-[#b5b2ac] text-sm">{item.name}</span>
+                  <span className="text-white font-medium text-sm">{item.time}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3 — Links & Newsletter */}
+          <div className="space-y-5">
+            <h3 className="text-white font-semibold text-base uppercase tracking-wide">
+              Quick Links
+            </h3>
+            <ul className="space-y-3">
+              {[
+                { label: "Home", href: "/" },
+                { label: "About & History", href: "/about" },
+                { label: "Connect", href: "/connect" },
+                { label: "Prayer Requests", href: "/connect?tab=prayer" },
+                { label: "Giving", href: "/connect?tab=giving" },
+                { label: "Gallery", href: "/gallery" },
+                { label: "Contact Us", href: "/contact" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-[#b5b2ac] text-sm hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* Newsletter */}
+            <div className="pt-4 border-t border-white/10">
+              <p className="text-white text-sm font-medium mb-3">
+                Get our weekly bulletin
               </p>
               {subscribed ? (
-                <div className="flex items-center gap-2 text-xs font-mono text-[#2b4c38] py-2">
+                <div className="flex items-center gap-2 text-sm text-[#2b4c38] bg-[#d4f0e0] rounded-lg px-4 py-3">
                   <Check className="w-4 h-4" />
-                  <span>Subscribed to weekly bulletin</span>
+                  <span>You're subscribed!</span>
                 </div>
               ) : (
-                <form onSubmit={handleSubscribe} className="flex gap-2">
+                <form onSubmit={handleSubscribe} className="flex flex-col gap-2">
                   <input
                     type="email"
                     required
-                    placeholder="Enter your email"
+                    placeholder="Your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 px-3 py-2 text-xs border border-[#e8e4dc] bg-white text-[#1c1b18] placeholder-[#8a877e] focus:outline-none focus:border-[#1c1b18]"
-                    style={{ borderRadius: "2px" }}
+                    className="w-full px-4 py-3 text-sm rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/60 transition-colors"
                   />
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-2 bg-[#1c1b18] text-white text-[10px] font-mono uppercase tracking-widest hover:bg-[#333] transition-colors disabled:opacity-50"
-                    style={{ borderRadius: "2px" }}
+                    className="w-full px-4 py-3 bg-[#781d19] text-white text-sm font-medium rounded-lg hover:bg-[#9a2520] transition-colors disabled:opacity-50"
                   >
-                    {submitting ? "..." : "Join"}
+                    {submitting ? "Subscribing…" : "Subscribe"}
                   </button>
                 </form>
               )}
             </div>
-
-            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#8c8b85] pt-2">
-              Nairobi Presbytery &bull; Chartered Parish
-            </div>
-          </div>
-
-          {/* Col 2: Gathering Times */}
-          <div className="md:col-span-4 space-y-3">
-            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#8c8b85]">
-              Gatherings
-            </div>
-            <ul className="space-y-2.5 text-xs font-mono text-[#575754]">
-              <li className="flex justify-between border-b border-[#eae8e2] pb-1.5">
-                <span>First Service (English)</span>
-                <span className="text-[#121212] font-semibold">08:30 EAT</span>
-              </li>
-              <li className="flex justify-between border-b border-[#eae8e2] pb-1.5">
-                <span>Second Service (English)</span>
-                <span className="text-[#121212] font-semibold">10:45 EAT</span>
-              </li>
-              <li className="flex justify-between border-b border-[#eae8e2] pb-1.5">
-                <span>Church School &amp; Teens</span>
-                <span className="text-[#121212] font-semibold">Concurrent</span>
-              </li>
-              <li className="flex justify-between border-b border-[#eae8e2] pb-1.5">
-                <span>Tuesday Prayer Cell</span>
-                <span className="text-[#121212] font-semibold">Tue 18:00</span>
-              </li>
-              <li className="flex justify-between pb-1.5">
-                <span>Midweek Bible Study</span>
-                <span className="text-[#121212] font-semibold">Wed 18:00</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 3: Directory & Action Hub */}
-          <div className="md:col-span-3 space-y-3">
-            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#8c8b85]">
-              Directory &amp; Connect
-            </div>
-            <ul className="space-y-2 text-xs font-mono uppercase tracking-wider">
-              <li>
-                <Link to="/" className="text-[#575754] hover:text-[#121212] transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-[#575754] hover:text-[#121212] transition-colors">
-                  About &amp; History
-                </Link>
-              </li>
-              <li>
-                <Link to="/connect" className="text-[#575754] hover:text-[#121212] transition-colors">
-                  Connect &amp; Participate
-                </Link>
-              </li>
-              <li>
-                <Link to="/connect?tab=prayer" className="text-[#781d19] font-medium hover:underline transition-colors">
-                  Prayer Requests
-                </Link>
-              </li>
-              <li>
-                <Link to="/connect?tab=giving" className="text-[#575754] hover:text-[#121212] transition-colors">
-                  Stewardship &amp; Giving
-                </Link>
-              </li>
-              <li>
-                <Link to="/gallery" className="text-[#575754] hover:text-[#121212] transition-colors">
-                  Photographic Archive
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-[#575754] hover:text-[#121212] transition-colors">
-                  Location &amp; Inquiries
-                </Link>
-              </li>
-            </ul>
-
-            <div className="pt-4 space-y-1 text-xs font-mono text-[#8c8b85]">
-              <div>Mandera Road, Kileleshwa, Nairobi</div>
-              <div>secretary@pceakileleshwa.or.ke</div>
-              <div>+254 700 000 000</div>
-            </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom Colophon */}
-        <div className="mt-16 pt-8 border-t border-[#eae8e2] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-[#8c8b85]">
-          <div>
-            &copy; {new Date().getFullYear()} PCEA Kileleshwa. All rights reserved.
-          </div>
-          <div className="flex items-center space-x-4">
-            <span>Presbyterian Church of East Africa</span>
-            <span>&bull;</span>
-            <span>Nairobi Presbytery</span>
-          </div>
+      {/* Bottom bar */}
+      <div className="border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-6 lg:px-12 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[#6b6864] text-sm">
+          <span>© {new Date().getFullYear()} PCEA Kileleshwa. All rights reserved.</span>
+          <span>Presbyterian Church of East Africa · Nairobi Presbytery</span>
         </div>
       </div>
     </footer>

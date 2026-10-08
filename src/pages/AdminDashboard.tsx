@@ -646,7 +646,9 @@ export function AdminDashboard() {
                 {filteredDocuments.length === 0 && (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-[#8a877e] text-xs">
-                      No documents found matching your search.
+                      {documents.length === 0
+                        ? "No archived church documents on record yet. Authorized officials can file minutes or reports using \"+ Add Document\" above."
+                        : "No documents found matching your search filters."}
                     </td>
                   </tr>
                 )}
@@ -731,6 +733,15 @@ export function AdminDashboard() {
                   </div>
                 </div>
               ))}
+
+              {monthlyReports.length === 0 && (
+                <div className="py-12 text-center border border-dashed border-[#e8e4dc] bg-[#faf8f5] p-6 space-y-2">
+                  <p className="font-serif text-lg text-[#1c1b18]">No Committee Reports on Record</p>
+                  <p className="text-xs text-[#8a877e] max-w-md mx-auto">
+                    Authorized committee secretaries can submit monthly ministry activities and expenditure reports for Local Church Council review using &ldquo;+ Submit Report&rdquo; above.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -759,7 +770,7 @@ export function AdminDashboard() {
                     Chair: {c.chairperson} &bull; Sec: {c.secretary}
                   </p>
                   <p className="text-[10px] font-mono text-[#8a877e]">
-                    Term: {c.termPeriod} &bull; {c.recordsCount} records filed
+                    Term: {c.termPeriod} &bull; {documents.filter((d) => d.committeeCode === c.code).length} filed records
                   </p>
                 </div>
               ))}
@@ -1000,17 +1011,21 @@ export function AdminDashboard() {
             {canAccessFinance ? (
               <div className="space-y-3 text-xs">
                 <div className="p-3.5 bg-[#faf8f5] border border-[#e8e4dc]">
-                  <p className="text-[10px] font-mono uppercase text-[#8a877e]">Operational Budget 2026</p>
-                  <p className="font-serif text-xl text-[#1c1b18] mt-0.5">KES 18,400,000</p>
-                  <p className="text-[10px] text-[#2b4c38] mt-0.5">Approved at AGM</p>
+                  <p className="text-[10px] font-mono uppercase text-[#8a877e]">Reported Committee Spending</p>
+                  <p className="font-serif text-xl text-[#1c1b18] mt-0.5">
+                    KES {monthlyReports.reduce((acc, r) => acc + (Number(r.budgetSpentKES) || 0), 0).toLocaleString()}
+                  </p>
+                  <p className="text-[10px] text-[#2b4c38] mt-0.5">From filed monthly returns</p>
                 </div>
                 <div className="p-3.5 bg-[#faf8f5] border border-[#e8e4dc]">
-                  <p className="text-[10px] font-mono uppercase text-[#8a877e]">Sanctuary Extension Fund</p>
-                  <p className="font-serif text-xl text-[#c2902b] mt-0.5">KES 6,850,000</p>
-                  <p className="text-[10px] text-[#8a877e] mt-0.5">Special Project Account</p>
+                  <p className="text-[10px] font-mono uppercase text-[#8a877e]">Public Giving &amp; Pledges</p>
+                  <p className="font-serif text-xl text-[#781d19] mt-0.5">
+                    {publicInbox.filter((item) => item.table === "giving_pledges").length} Pledges on File
+                  </p>
+                  <p className="text-[10px] text-[#8a877e] mt-0.5">Received via Connect portal</p>
                 </div>
                 <div className="pt-2 text-[11px] font-mono text-[#8a877e]">
-                  Audited statements for 2024 and 2025 on file.
+                  Official annual audit statements filed under Category &ldquo;Finance&rdquo;.
                 </div>
               </div>
             ) : (

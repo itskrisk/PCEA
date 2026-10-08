@@ -324,7 +324,7 @@ export async function fetchDocumentsFromDB(): Promise<ChurchDocument[]> {
     }
   }
 
-  return getLocalStore("documents", INITIAL_DOCUMENTS);
+  return getLocalStore("documents", []);
 }
 
 export async function insertDocumentToDB(doc: Omit<ChurchDocument, "id">): Promise<ChurchDocument> {
@@ -332,7 +332,7 @@ export async function insertDocumentToDB(doc: Omit<ChurchDocument, "id">): Promi
   const createdDoc: ChurchDocument = { ...doc, id: newId };
 
   // Update persistent local store immediately
-  const existing = getLocalStore<ChurchDocument[]>("documents", INITIAL_DOCUMENTS);
+  const existing = getLocalStore<ChurchDocument[]>("documents", []);
   const updated = [createdDoc, ...existing];
   setLocalStore("documents", updated);
 
@@ -383,14 +383,14 @@ export async function fetchMonthlyReportsFromDB(): Promise<MonthlyReport[]> {
     }
   }
 
-  return getLocalStore("monthly_reports", INITIAL_MONTHLY_REPORTS);
+  return getLocalStore("monthly_reports", []);
 }
 
 export async function insertMonthlyReportToDB(rep: Omit<MonthlyReport, "id">): Promise<MonthlyReport> {
   const newId = "rep-" + Date.now();
   const createdRep: MonthlyReport = { ...rep, id: newId };
 
-  const existing = getLocalStore<MonthlyReport[]>("monthly_reports", INITIAL_MONTHLY_REPORTS);
+  const existing = getLocalStore<MonthlyReport[]>("monthly_reports", []);
   setLocalStore("monthly_reports", [createdRep, ...existing]);
 
   if (supabase) {
@@ -416,7 +416,7 @@ export async function insertMonthlyReportToDB(rep: Omit<MonthlyReport, "id">): P
 }
 
 export async function approveMonthlyReportInDB(reportId: string, notes: string): Promise<void> {
-  const existing = getLocalStore<MonthlyReport[]>("monthly_reports", INITIAL_MONTHLY_REPORTS);
+  const existing = getLocalStore<MonthlyReport[]>("monthly_reports", []);
   const updated = existing.map((r) =>
     r.id === reportId ? { ...r, status: "Reviewed by LCC" as const, lccNotes: notes } : r
   );
@@ -455,14 +455,14 @@ export async function fetchHandoversFromDB(): Promise<HandoverRecord[]> {
     }
   }
 
-  return getLocalStore("handovers", INITIAL_HANDOVERS);
+  return getLocalStore("handovers", []);
 }
 
 export async function insertHandoverToDB(hnd: Omit<HandoverRecord, "id">): Promise<HandoverRecord> {
   const newId = "hnd-" + Date.now();
   const createdHnd: HandoverRecord = { ...hnd, id: newId };
 
-  const existing = getLocalStore<HandoverRecord[]>("handovers", INITIAL_HANDOVERS);
+  const existing = getLocalStore<HandoverRecord[]>("handovers", []);
   setLocalStore("handovers", [createdHnd, ...existing]);
 
   if (supabase) {
@@ -506,7 +506,7 @@ export async function fetchAuditLogsFromDB(): Promise<AuditLogItem[]> {
     }
   }
 
-  return getLocalStore("audit_logs", INITIAL_AUDIT_LOGS);
+  return getLocalStore("audit_logs", []);
 }
 
 export async function recordAuditEvent(userName: string, role: string, action: AuditLogItem["action"], details: string): Promise<void> {
@@ -519,7 +519,7 @@ export async function recordAuditEvent(userName: string, role: string, action: A
     details: details,
   };
 
-  const existing = getLocalStore<AuditLogItem[]>("audit_logs", INITIAL_AUDIT_LOGS);
+  const existing = getLocalStore<AuditLogItem[]>("audit_logs", []);
   setLocalStore("audit_logs", [newLog, ...existing.slice(0, 50)]);
 
   if (supabase) {
