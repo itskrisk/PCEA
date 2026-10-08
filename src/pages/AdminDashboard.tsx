@@ -425,16 +425,16 @@ export function AdminDashboard() {
           </div>
 
           {/* Right: Officer details & Sign Out */}
-          <div className="flex items-center gap-5">
-            <div className="text-right">
-              <p className="font-serif text-sm text-[#1c1b18]">{activeOfficial.name}</p>
-              <p className="text-[10px] font-mono text-[#781d19]">{activeOfficial.title}</p>
+          <div className="flex items-center gap-2.5 sm:gap-5">
+            <div className="text-right max-w-[130px] sm:max-w-none">
+              <p className="font-serif text-xs sm:text-sm text-[#1c1b18] truncate">{activeOfficial.name}</p>
+              <p className="text-[10px] font-mono text-[#781d19] truncate">{activeOfficial.title}</p>
             </div>
 
             <button
               type="button"
               onClick={handleLogout}
-              className="px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider border border-[#e8e4dc] hover:border-[#1c1b18] text-[#57554f] hover:text-[#1c1b18] transition-colors"
+              className="px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-mono uppercase tracking-wider border border-[#e8e4dc] hover:border-[#1c1b18] text-[#57554f] hover:text-[#1c1b18] transition-colors shrink-0"
               style={{ borderRadius: "2px" }}
             >
               Sign Out
@@ -1049,8 +1049,8 @@ export function AdminDashboard() {
 
       {/* ── MODAL: ADD DOCUMENT ─────────────────────────────────────── */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white max-w-lg w-full p-8 border border-[#e8e4dc] space-y-5 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+          <div className="bg-white max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 border border-[#e8e4dc] space-y-5 shadow-lg rounded-xl">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#781d19]">New File</p>
@@ -1144,8 +1144,8 @@ export function AdminDashboard() {
 
       {/* ── MODAL: SUBMIT MONTHLY REPORT ───────────────────────────── */}
       {showReportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white max-w-lg w-full p-8 border border-[#e8e4dc] space-y-5 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+          <div className="bg-white max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 border border-[#e8e4dc] space-y-5 shadow-lg rounded-xl">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#781d19]">Monthly Submission</p>
@@ -1240,8 +1240,8 @@ export function AdminDashboard() {
 
       {/* ── MODAL: 3-YEAR HANDOVER FORM ────────────────────────────── */}
       {showHandoverModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white max-w-lg w-full p-8 border border-[#e8e4dc] space-y-5 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+          <div className="bg-white max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 border border-[#e8e4dc] space-y-5 shadow-lg rounded-xl">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#781d19]">Leadership Transition</p>
@@ -1332,8 +1332,8 @@ export function AdminDashboard() {
 
       {/* ── MODAL: DOCUMENT VIEW ────────────────────────────────────── */}
       {selectedDocPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white max-w-lg w-full p-8 border border-[#e8e4dc] space-y-4 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+          <div className="bg-white max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 border border-[#e8e4dc] space-y-4 shadow-lg rounded-xl">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#781d19]">
@@ -1392,8 +1392,8 @@ export function AdminDashboard() {
 
       {/* ── MODAL: DETAILED INBOX SUBMISSION ───────────────────────── */}
       {selectedInboxItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white max-w-lg w-full p-8 border border-[#e8e4dc] space-y-5 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+          <div className="bg-white max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 border border-[#e8e4dc] space-y-5 shadow-lg rounded-xl">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#781d19]">
